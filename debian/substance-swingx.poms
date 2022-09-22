@@ -1,0 +1,1 @@
+debian/pom-substance-swingx.xml --java-lib --has-package-version --artifact=substance-swingx/build/libs/substance-swingx-7.3.jar

@@ -1,0 +1,5 @@
+# this matches /Insubstantial/insubstantial/archive/insubstantial_7.3.tar.gz
+
+version=3
+opts=dversionmangle=s/\+dfsg[1-9]//\
+  https://github.com/Insubstantial/insubstantial/releases .*/insubstantial_(\d[\d\.]*)\.tar\.gz

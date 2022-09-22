@@ -1,0 +1,142 @@
+group = 'com.github.insubstantial'
+version = '7.3.1-SNAPSHOT'
+
+if (JavaVersion.current().isJava8Compatible()) {
+  allprojects {
+    tasks.withType(Javadoc) {
+      options.addStringOption('Xdoclint:none', '-quiet')
+    }
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'signing'
+
+  group = 'com.github.insubstantial'
+  version = '7.3.1-SNAPSHOT'
+  ext.versionKey = "7.3-destroyer"
+
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+
+  configurations {
+    maven { extendsFrom archives }
+    published { extendsFrom archives, signatures}
+    distro {extendsFrom runtime}
+  }
+
+  signing {
+    required = { gradle.taskGraph.hasTask(uploadPublished) && !version.endsWith("SNAPSHOT") }
+    sign configurations.archives
+  }
+
+  repositories {
+    maven { url 'https://oss.sonatype.org/content/groups/staging' }
+    mavenCentral()
+    maven { url new File(System.getProperty('user.home'), '.m2/repository').toURI().toString() }
+  }
+
+  task sourceJar(type: Jar) {
+    from sourceSets.main.java
+    from sourceSets.main.resources
+    classifier = 'sources'
+  }
+
+  task javadocJar(type: Jar) {
+    dependsOn javadoc
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+  }
+
+  artifacts {
+    archives sourceJar
+    archives javadocJar
+  }
+
+  uploadPublished {
+    doFirst {
+      // configure repositories ina  doFirst so we can late bind the proeprties
+      checkPasswords()
+      repositories {
+        mavenDeployer {
+          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+          snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            authentication userName: sonatypeUsername, password: sonatypePassword
+          }
+          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication userName: sonatypeUsername, password: sonatypePassword
+          }
+        }
+      }
+    }
+    configuration = configurations.published
+  }
+
+  install {
+    configuration = configurations.published
+  }
+
+  ext.configureBasePom = { pom ->
+    pom.project {
+      modelVersion '4.0.0'
+      packaging 'jar'
+      scm {
+        connection 'scm:git:git@github.com:Insubstantial/insubstantial.git'
+        developerConnection 'scm:git:git@github.com:Insubstantial/insubstantial.git'
+        url 'scm:git:git@github.com:Insubstantial/insubstantial.git'
+      }
+      developers {
+        developer {
+          name 'Kirill Grouchnikov'
+          email 'kirillcool@yahoo.com'
+          roles {
+            role 'author'
+            role 'developer'
+          }
+        }
+        developer {
+          name 'Danno Ferrin'
+          email 'danno.ferrin@shemnon.com'
+          roles {
+            role 'maintainer'
+          }
+        }
+      }
+    }
+  }
+}
+
+task githubDist(type: Zip) {
+  archiveName = "insubstantial-libraries-${project.version}.zip"
+  from subprojects*.configurations['distro']*.allArtifacts.files
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.0-rc-3'
+}
+
+def checkPasswords() {
+  try {
+    check = [ext.sonatypeUsername, ext.sonatypePassword]
+    println "Using sonatype user $sonatypeUsername"
+  } catch (MissingPropertyException e) {
+    Console console = System.console()
+    console.printf "\n\nIn order to upload to Sonatype we need your username and password.\nEnter a blank username or password to skip upload\n\n"
+    ext.sonatypeUsername = console.readLine("Sonatype Username: ")
+    ext.sonatypePassword = new String(console.readPassword("Sonatype Password: "))
+    if (!sonatypePassword || !sonatypeUsername) {
+      console.printf("\n\nSonatype upload aborted")
+      subprojects {
+        signing {
+          enabled = false
+        }
+        uploadPublished {
+          enabled = false
+        }
+      }
+      throw new StopExecutionException()
+    }
+  }
+}

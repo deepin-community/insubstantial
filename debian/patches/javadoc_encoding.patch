@@ -1,0 +1,16 @@
+Description: Set javadoc encoding to UTF-8
+Author: Felix Natter <fnatter@gmx.net>
+Forwarded: not-needed
+Last-Update: 2015-06-13
+
+--- a/build.gradle
++++ b/build.gradle
+@@ -14,6 +14,8 @@
+   apply plugin: 'maven'
+   apply plugin: 'signing'
+ 
++  javadoc.options.encoding = "UTF-8"
++
+   group = 'com.github.insubstantial'
+   version = '7.3'
+   ext.versionKey = "7.3-destroyer"

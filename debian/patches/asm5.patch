@@ -1,0 +1,305 @@
+Description: move package from ASM2 to ASM5/libasm4-java (older versions
+  will be removed from Debian)
+Author: Felix Natter <fnatter@gmx.net>
+Forwarded: no (upstream is currently not active)
+Reviewed-by: Remi Forax <forax@univ-mlv.fr> (http://mail.ow2.org/wws/arc/asm/2015-10/msg00004.html)
+Last-Update: 2015-10-24
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/ContainerGhostingAugmenter.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/ContainerGhostingAugmenter.java
+@@ -54,7 +54,7 @@
+ 	 * 
+ 	 * @author Kirill Grouchnikov.
+ 	 */
+-	protected class AugmentClassAdapter extends ClassAdapter implements Opcodes {
++	protected class AugmentClassAdapter extends ClassVisitor implements Opcodes {
+ 		/**
+ 		 * Contains all method names.
+ 		 */
+@@ -99,7 +99,7 @@
+ 		public AugmentClassAdapter(final ClassVisitor cv,
+ 				Set<String> existingMethods, Set<String> existingFields,
+ 				Method methodToAugment, boolean toInjectAfterOriginal) {
+-			super(cv);
++		    super(Opcodes.ASM4, cv);
+ 			this.existingMethods = existingMethods;
+ 			this.existingFields = existingFields;
+ 			this.methodToAugment = methodToAugment;
+@@ -374,7 +374,7 @@
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+ 			InfoClassVisitor infoAdapter = new InfoClassVisitor();
+-			cr.accept(infoAdapter, false);
++			cr.accept(infoAdapter, 0);
+ 			existingMethods = infoAdapter.getMethods();
+ 			existingFields = infoAdapter.getFields();
+ 		} catch (Exception e) {
+@@ -401,10 +401,10 @@
+ 		try {
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+-			ClassWriter cw = new ClassWriter(false);
++			ClassWriter cw = new ClassWriter(0);
+ 			ClassVisitor cv = new AugmentClassAdapter(cw, existingMethods,
+ 					existingFields, methodToAugment, toInjectAfterOriginal);
+-			cr.accept(cv, false);
++			cr.accept(cv, 0);
+ 			b = cw.toByteArray();
+ 		} catch (Exception e) {
+ 			throw new AugmentException(name, e);
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/IconGhostingAugmenter.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/IconGhostingAugmenter.java
+@@ -58,7 +58,7 @@
+ 	 * 
+ 	 * @author Kirill Grouchnikov.
+ 	 */
+-	protected class AugmentClassAdapter extends ClassAdapter implements Opcodes {
++	protected class AugmentClassAdapter extends ClassVisitor implements Opcodes {
+ 		/**
+ 		 * Contains all method names.
+ 		 */
+@@ -100,7 +100,7 @@
+ 				Method methodToAugment// ,
+ 		// Method methodInstallListeners, Method methodUninstallListeners
+ 		) {
+-			super(cv);
++		    super(Opcodes.ASM4, cv);
+ 			this.existingMethods = existingMethods;
+ 			this.existingFields = existingFields;
+ 			this.methodToAugment = methodToAugment;
+@@ -595,7 +595,7 @@
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+ 			InfoClassVisitor infoAdapter = new InfoClassVisitor();
+-			cr.accept(infoAdapter, false);
++			cr.accept(infoAdapter, 0);
+ 			existingMethods = infoAdapter.getMethods();
+ 			existingFields = infoAdapter.getFields();
+ 		} catch (Exception e) {
+@@ -621,12 +621,12 @@
+ 		try {
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+-			ClassWriter cw = new ClassWriter(false);
++			ClassWriter cw = new ClassWriter(0);
+ 			ClassVisitor cv = new AugmentClassAdapter(cw, existingMethods,
+ 					existingFields, methodToAugment// , methodInstallListeners,
+ 			// methodUninstallListeners);
+ 			);
+-			cr.accept(cv, false);
++			cr.accept(cv, 0);
+ 			b = cw.toByteArray();
+ 		} catch (Exception e) {
+ 			throw new AugmentException(name, e);
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/LafMainClassAugmenter.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/LafMainClassAugmenter.java
+@@ -67,7 +67,7 @@
+ 	 * 
+ 	 * @author Kirill Grouchnikov
+ 	 */
+-	protected class AugmentClassAdapter extends ClassAdapter implements Opcodes {
++	protected class AugmentClassAdapter extends ClassVisitor implements Opcodes {
+ 		/**
+ 		 * Contains all method names.
+ 		 */
+@@ -99,7 +99,7 @@
+ 		 */
+ 		public AugmentClassAdapter(ClassVisitor cv,
+ 				Set<String> existingMethods, Method originalMethod) {
+-			super(cv);
++		    super(Opcodes.ASM4, cv);
+ 			this.existingMethods = existingMethods;
+ 			// this.originalMethod = originalMethod;
+ 		}
+@@ -304,7 +304,7 @@
+ 			ClassReader cr = new ClassReader(is);
+ 			// ClassWriter cw = new ClassWriter(false);
+ 			InfoClassVisitor infoAdapter = new InfoClassVisitor();
+-			cr.accept(infoAdapter, false);
++			cr.accept(infoAdapter, 0);
+ 			existingMethods = infoAdapter.getMethods();
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+@@ -322,10 +322,10 @@
+ 		try {
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+-			ClassWriter cw = new ClassWriter(false);
++			ClassWriter cw = new ClassWriter(0);
+ 			AugmentClassAdapter cv = new AugmentClassAdapter(cw,
+ 					existingMethods, origMethod);
+-			cr.accept(cv, false);
++			cr.accept(cv, 0);
+ 			b = cw.toByteArray();
+ 			superClassName = cv.getSuperClassName();
+ 		} catch (Exception e) {
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateAugmenter.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateAugmenter.java
+@@ -49,7 +49,7 @@
+ import javax.swing.JComponent;
+ import javax.swing.plaf.ComponentUI;
+ 
+-import org.objectweb.asm.ClassAdapter;
++//import org.objectweb.asm.ClassAdapter;
+ import org.objectweb.asm.ClassReader;
+ import org.objectweb.asm.ClassVisitor;
+ import org.objectweb.asm.ClassWriter;
+@@ -80,7 +80,7 @@
+ 	 * 
+ 	 * @author Kirill Grouchnikov
+ 	 */
+-	protected class AugmentClassAdapter extends ClassAdapter implements Opcodes {
++	protected class AugmentClassAdapter extends ClassVisitor implements Opcodes {
+ 		/**
+ 		 * Contains all method names.
+ 		 */
+@@ -118,7 +118,7 @@
+ 		public AugmentClassAdapter(final ClassVisitor cv,
+ 				Set<String> existingMethods, Set<String> existingFields,
+ 				Map<String, Method> methodsToAugment) {
+-			super(cv);
++		    super(Opcodes.ASM4, cv);
+ 			this.existingMethods = existingMethods;
+ 			this.existingFields = existingFields;
+ 			this.methodsToAugment = methodsToAugment;
+@@ -550,7 +550,7 @@
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+ 			InfoClassVisitor infoAdapter = new InfoClassVisitor();
+-			cr.accept(infoAdapter, false);
++			cr.accept(infoAdapter, 0);
+ 			existingMethods = infoAdapter.getMethods();
+ 			existingFields = infoAdapter.getFields();
+ 		} catch (Exception e) {
+@@ -576,10 +576,10 @@
+ 		try {
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+-			ClassWriter cw = new ClassWriter(false);
++			ClassWriter cw = new ClassWriter(0);
+ 			ClassVisitor cv = new AugmentClassAdapter(cw, existingMethods,
+ 					existingFields, methodsToAugment);
+-			cr.accept(cv, false);
++			cr.accept(cv, 0);
+ 			b = cw.toByteArray();
+ 		} catch (Exception e) {
+ 			throw new AugmentException(name, e);
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateUpdateAugmenter.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateUpdateAugmenter.java
+@@ -45,7 +45,7 @@
+ import javax.swing.JComponent;
+ import javax.swing.plaf.ComponentUI;
+ 
+-import org.objectweb.asm.ClassAdapter;
++//import org.objectweb.asm.ClassAdapter;
+ import org.objectweb.asm.ClassReader;
+ import org.objectweb.asm.ClassVisitor;
+ import org.objectweb.asm.ClassWriter;
+@@ -69,7 +69,7 @@
+ 	 * 
+ 	 * @author Kirill Grouchnikov
+ 	 */
+-	protected class AugmentClassAdapter extends ClassAdapter implements Opcodes {
++	protected class AugmentClassAdapter extends ClassVisitor implements Opcodes {
+ 		/**
+ 		 * Contains all method names.
+ 		 */
+@@ -97,7 +97,7 @@
+ 		 */
+ 		public AugmentClassAdapter(final ClassVisitor cv,
+ 				Set<String> existingMethods, Method updateMethod) {
+-			super(cv);
++		    super(Opcodes.ASM4, cv);
+ 			this.existingMethods = existingMethods;
+ 			this.updateMethod = updateMethod;
+ 		}
+@@ -297,7 +297,7 @@
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+ 			InfoClassVisitor infoAdapter = new InfoClassVisitor();
+-			cr.accept(infoAdapter, false);
++			cr.accept(infoAdapter, 0);
+ 			existingMethods = infoAdapter.getMethods();
+ 		} catch (Exception e) {
+ 			throw new AugmentException(name, e);
+@@ -313,10 +313,10 @@
+ 		try {
+ 			is = new FileInputStream(resource);
+ 			ClassReader cr = new ClassReader(is);
+-			ClassWriter cw = new ClassWriter(false);
++			ClassWriter cw = new ClassWriter(0);
+ 			ClassVisitor cv = new AugmentClassAdapter(cw, existingMethods,
+ 					updateMethod);
+-			cr.accept(cv, false);
++			cr.accept(cv, 0);
+ 			b = cw.toByteArray();
+ 		} catch (Exception e) {
+ 			throw new AugmentException(name, e);
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/InfoClassVisitor.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/InfoClassVisitor.java
+@@ -32,14 +32,14 @@
+ import java.util.*;
+ 
+ import org.objectweb.asm.*;
+-import org.objectweb.asm.commons.EmptyVisitor;
++//import org.objectweb.asm.commons.EmptyVisitor;
+ 
+ /**
+  * Gathers information on all methods and fields of some class.
+  * 
+  * @author Kirill Grouchnikov
+  */
+-public class InfoClassVisitor extends EmptyVisitor implements Opcodes {
++public class InfoClassVisitor extends /*EmptyVisitor*/ClassVisitor implements Opcodes {
+ 	/**
+ 	 * All method names.
+ 	 */
+@@ -54,6 +54,7 @@
+ 	 * Creates a new visitor.
+ 	 */
+ 	public InfoClassVisitor() {
++	    super(Opcodes.ASM4);
+ 		this.methods = new HashSet<String>();
+ 		this.fields = new HashSet<String>();
+ 	}
+@@ -69,7 +70,8 @@
+     public MethodVisitor visitMethod(final int access, final String name,
+ 			final String desc, final String signature, final String[] exceptions) {
+ 		this.methods.add(name);
+-		return this;
++		//return this;
++		return new MethodVisitor(Opcodes.ASM4) {};
+ 	}
+ 
+ 	/*
+@@ -83,7 +85,8 @@
+     public FieldVisitor visitField(int access, String name, String desc,
+ 			String signature, Object value) {
+ 		this.fields.add(name);
+-		return this;
++		//return this;
++		return new FieldVisitor(Opcodes.ASM4) {};
+ 	}
+ 
+ 	/**
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateWriterEmptyCtr.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateWriterEmptyCtr.java
+@@ -42,7 +42,7 @@
+ 	 * Creates a new bytecode writer.
+ 	 */
+ 	public UiDelegateWriterEmptyCtr() {
+-		super(false);
++		super(0);
+ 	}
+ 
+ 	/**
+--- a/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateWriterOneParamCtr.java
++++ b/laf-widget/src/main/java/org/pushingpixels/lafwidget/ant/UiDelegateWriterOneParamCtr.java
+@@ -42,7 +42,7 @@
+ 	 * Creates a new bytecode writer.
+ 	 */
+ 	public UiDelegateWriterOneParamCtr() {
+-		super(false);
++		super(0);
+ 	}
+ 
+ 	/**

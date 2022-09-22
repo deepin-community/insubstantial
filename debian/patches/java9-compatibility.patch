@@ -1,0 +1,96 @@
+Description: Fixes the compatibility with Java 9
+Author: Emmanuel Bourg <ebourg@apache.org>
+Forwarded: no
+--- a/substance/src/main/java/org/pushingpixels/substance/internal/ui/SubstanceRootPaneUI.java
++++ b/substance/src/main/java/org/pushingpixels/substance/internal/ui/SubstanceRootPaneUI.java
+@@ -84,7 +84,6 @@
+ import javax.swing.plaf.UIResource;
+ import javax.swing.plaf.basic.BasicRootPaneUI;
+ 
+-import com.sun.awt.AWTUtilities;
+ import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+ import org.pushingpixels.substance.api.SubstanceSkin;
+ import org.pushingpixels.substance.internal.animation.RootPaneDefaultButtonTracker;
+@@ -1678,7 +1677,7 @@
+                         || (!SubstanceCoreUtilities.isRoundedCorners(jrp)))
+                     {
+                         // special case, for undecorated windows and maximized windows
+-                        AWTUtilities.setWindowShape(w, null);
++                        w.setShape(null);
+                         return;
+                     }
+                 }
+@@ -1686,12 +1685,12 @@
+                     // only round the corners if the screen is reasonably sized, as in
+                     // smaller than archival versions of The Godfather, which is at 4096x2160
+                     if (SubstanceCoreUtilities.isRoundedCorners(w) && w.getWidth() * w.getHeight() < (4096*4096)) {
+-                        AWTUtilities.setWindowShape(w, new RoundRectangle2D.Double(0, 0, w.getWidth(), w.getHeight(), 12, 12));
++                        w.setShape(new RoundRectangle2D.Double(0, 0, w.getWidth(), w.getHeight(), 12, 12));
+                     } else {
+-                        AWTUtilities.setWindowShape(w, null);
++                        w.setShape(null);
+                     }
+                 } catch (OutOfMemoryError oome) {
+-                    AWTUtilities.setWindowShape(w, null);
++                    w.setShape(null);
+                     //System.out.println("Rounded panel size on OOOME : " + w.getWidth() + "x" + w.getHeight() + " for an area of " + w.getWidth()*w.getHeight() + "px");
+                     //throw oome;
+                 }
+--- a/substance/src/main/java/org/pushingpixels/substance/internal/utils/SubstanceCoreUtilities.java
++++ b/substance/src/main/java/org/pushingpixels/substance/internal/utils/SubstanceCoreUtilities.java
+@@ -43,7 +43,6 @@
+ import javax.swing.plaf.*;
+ import javax.swing.text.JTextComponent;
+ 
+-import com.sun.awt.AWTUtilities;
+ import org.pushingpixels.lafwidget.LafWidgetUtilities;
+ import org.pushingpixels.lafwidget.utils.TrackableThread;
+ import org.pushingpixels.substance.api.*;
+@@ -501,7 +500,10 @@
+ 
+             // next step, check AWTUtilities capabilities
+             if (globalRoundingEnable) {
+-                globalRoundingEnable = AWTUtilities.isTranslucencySupported(AWTUtilities.Translucency.PERPIXEL_TRANSPARENT);
++                GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
++                GraphicsDevice d = e.getDefaultScreenDevice();
++
++                globalRoundingEnable = e.getDefaultScreenDevice().isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT);
+             }
+ 
+             // finally, add one listener to listen to the UIManager defaults value when the default changes.
+--- a/flamingo/src/main/java/org/pushingpixels/flamingo/api/ribbon/JRibbonFrame.java
++++ b/flamingo/src/main/java/org/pushingpixels/flamingo/api/ribbon/JRibbonFrame.java
+@@ -130,15 +130,7 @@
+ 
+ 			// Support placing heavyweight components in the ribbon frame. See
+ 			// http://today.java.net/article/2009/11/02/transparent-panel-mixing-heavyweight-and-lightweight-components.
+-			try {
+-				Class awtUtilitiesClass = Class
+-						.forName("com.sun.awt.AWTUtilities");
+-				Method mSetComponentMixing = awtUtilitiesClass.getMethod(
+-						"setComponentMixingCutoutShape", Component.class,
+-						Shape.class);
+-				mSetComponentMixing.invoke(null, this, new Rectangle());
+-			} catch (Throwable ignored) {
+-			}
++			setMixingCutoutShape(new Rectangle());
+ 		}
+ 
+ 		@Override
+--- a/substance/src/main/java/org/pushingpixels/substance/internal/contrib/randelshofer/quaqua/QuaquaUtilities.java
++++ b/substance/src/main/java/org/pushingpixels/substance/internal/contrib/randelshofer/quaqua/QuaquaUtilities.java
+@@ -19,7 +19,6 @@
+ import java.awt.event.*;
+ import java.awt.font.*;
+ import java.awt.image.*;
+-import java.awt.peer.*;
+ import java.net.*;
+ import javax.swing.*;
+ import javax.swing.text.*;
+@@ -700,4 +699,4 @@
+         }
+         return null;
+     }
+-}
+\ No newline at end of file
++}

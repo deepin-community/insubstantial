@@ -1,0 +1,43 @@
+jar {
+  manifest {
+    attributes(
+        "Laf-Plugin-Version": version,
+        "Laf-Plugin-VersionName": versionKey,
+    )
+  }
+}
+
+uploadPublished {
+  repositories {
+    mavenDeployer {
+      configurePOM(pom)
+    }
+  }
+}
+
+install {
+  configurePOM(repositories.mavenInstaller.pom)
+}
+
+private def configurePOM(def pom) {
+  configureBasePom(pom)
+  pom.project {
+    name "laf-plugin"
+    description "A fork of @kirilcool's laf-plugin project"
+    url "http://insubstantial.github.com/insubstantial/laf-plugin/"
+    licenses {
+      license {
+        name 'The BSD License'
+        url 'http://www.opensource.org/licenses/bsd-license.php'
+        distribution 'repo'
+        comments 'Covers LafPlugin'
+      }
+      license {
+        name 'The zlib/libpng License'
+        url 'http://www.opensource.org/licenses/zlib-license'
+        distribution 'repo'
+        comments 'Covers the XMLElement and XMLParseException classes'
+      }
+    }
+  }
+}

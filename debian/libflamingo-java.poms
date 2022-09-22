@@ -1,0 +1,1 @@
+debian/pom-libflamingo.xml --java-lib --has-package-version --artifact=flamingo/build/libs/flamingo-7.3.jar

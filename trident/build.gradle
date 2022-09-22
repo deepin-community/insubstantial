@@ -1,0 +1,161 @@
+dependencies {
+  compile group: 'com.google.android', name: 'android', version: '2.3.1', transitive: false
+  compile group: 'org.eclipse.swt.win32.win32', name: 'x86', version: '3.3.0-v3346', transitive: false
+  compile group: 'net.jcip', name:'jcip-annotations', version: '1.0'
+}
+
+jar {
+  exclude 'META-INF/trident-plugin-*.properties'
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+task testJar(type: Jar) {
+  classifier = 'tst'
+
+  from sourceSets.test.output
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+
+def stripper = {part -> {it -> it - part}}
+
+task baseJar(type: Jar) {
+  classifier = 'base'
+
+  from sourceSets.main.output
+  exclude 'org/pushingpixels/trident/android/**'
+  exclude 'org/pushingpixels/trident/swing/**'
+  exclude 'org/pushingpixels/trident/swt/**'
+  exclude 'META-INF/trident-plugin.properties'
+  exclude 'META-INF/trident-plugin-android.properties'
+  //exclude 'META-INF/trident-plugin-base.properties'
+  exclude 'META-INF/trident-plugin-swing.properties'
+  exclude 'META-INF/trident-plugin-swt.properties'
+  rename stripper('-base')
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+task androidJar(type: Jar) {
+  classifier = 'android'
+
+  from sourceSets.main.output
+  exclude 'org/pushingpixels/trident/swing/**'
+  exclude 'org/pushingpixels/trident/swt/**'
+  exclude 'META-INF/trident-plugin.properties'
+  //exclude 'META-INF/trident-plugin-android.properties'
+  exclude 'META-INF/trident-plugin-base.properties'
+  exclude 'META-INF/trident-plugin-swing.properties'
+  exclude 'META-INF/trident-plugin-swt.properties'
+  rename stripper('-android')
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+task swingJar(type: Jar) {
+  classifier = 'swing'
+
+  from sourceSets.main.output
+  exclude 'org/pushingpixels/trident/android/**'
+  exclude 'org/pushingpixels/trident/swt/**'
+  exclude 'META-INF/trident-plugin.properties'
+  exclude 'META-INF/trident-plugin-android.properties'
+  exclude 'META-INF/trident-plugin-base.properties'
+  //exclude 'META-INF/trident-plugin-swing.properties'
+  exclude 'META-INF/trident-plugin-swt.properties'
+  rename stripper('-swing')
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+task swtJar(type: Jar) {
+  classifier = 'swt'
+
+  from sourceSets.main.output
+  exclude 'org/pushingpixels/trident/android/**'
+  exclude 'org/pushingpixels/trident/swing/**'
+  exclude 'META-INF/trident-plugin.properties'
+  exclude 'META-INF/trident-plugin-android.properties'
+  exclude 'META-INF/trident-plugin-base.properties'
+  exclude 'META-INF/trident-plugin-swing.properties'
+  //exclude 'META-INF/trident-plugin-swt.properties'
+  rename stripper('-swt')
+
+  manifest {
+    attributes(
+        "Trident-Version": version,
+        "Trident-VersionName": versionKey,
+    )
+  }
+}
+
+artifacts {
+  archives baseJar
+  archives androidJar
+  archives swingJar
+  archives swtJar
+  distro baseJar
+  distro androidJar
+  distro swingJar
+  distro swtJar
+}
+
+
+uploadPublished {
+  repositories {
+    mavenDeployer {
+      configurePOM(pom)
+    }
+  }
+}
+
+install {
+  configurePOM(repositories.mavenInstaller.pom)
+}
+
+private def configurePOM(def pom) {
+  configureBasePom(pom)
+  pom.project {
+    name "trident"
+    description "A fork of @kirilcool's trident project"
+    url "https://github.com/Insubstantial/insubstantial/tree/master/trident"
+    licenses {
+      license {
+        name 'The BSD License'
+        url 'http://www.opensource.org/licenses/bsd-license.php'
+        distribution 'repo'
+      }
+    }
+  }
+  // deal with a gradle bug where transitive=false is not passed into the generated POM
+  pom.whenConfigured {cpom ->
+    cpom.dependencies*.scope = 'provided'
+  }
+}

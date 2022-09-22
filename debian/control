@@ -1,0 +1,218 @@
+Source: insubstantial
+Section: java
+Priority: optional
+Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
+Uploaders: Felix Natter <fnatter@gmx.net>
+Build-Depends:
+ debhelper-compat (= 12),
+ default-jdk,
+ default-jdk-doc,
+ gradle,
+ gradle-debian-helper,
+ libasm-java (>= 5.0),
+ libjcip-annotations-java,
+ libswingx-java,
+ libswt-gtk-4-java,
+ maven-repo-helper
+Standards-Version: 4.4.0
+Vcs-Git: https://salsa.debian.org/java-team/insubstantial.git
+Vcs-Browser: https://salsa.debian.org/java-team/insubstantial
+Homepage: https://github.com/Insubstantial/insubstantial
+
+Package: libflamingo-java
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Suggests: libflamingo-java-doc
+Description: Provides a swing ribbon container for Java applications
+ The goal of this project is to provide a Swing implementation of the
+ ribbon container and related components. The components have
+ consistent visuals under the existing core and third-party
+ look-and-feels, respect the DPI settings of the user desktop and
+ follow the core Swing guidelines in the external APIs and the internal
+ implementation details.
+
+Package: libflamingo-java-doc
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Suggests: default-jdk-doc, libflamingo-java
+Section: doc
+Description: Provides a swing ribbon container for Java applications (documentation)
+ The goal of this project is to provide a Swing implementation of the
+ ribbon container and related components. The components have
+ consistent visuals under the existing core and third-party
+ look-and-feels, respect the DPI settings of the user desktop and
+ follow the core Swing guidelines in the external APIs and the internal
+ implementation details.
+ .
+ This package contains API documentation (Javadoc) for libflamingo-java.
+
+Package: liblaf-plugin-java
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: liblaf-plugin-java-doc
+Description: Support for third-party components in Java look-and-feel libraries
+ The goal of this project is to provide a generic plugin framework for
+ look-and-feels and define the interface of a common kind of plugins - the
+ component plugins.
+
+Package: liblaf-plugin-java-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: default-jdk-doc, liblaf-plugin-java
+Description: Support for third-party components in Java look-and-feel libraries (doc)
+ The goal of this project is to provide a generic plugin framework for
+ look-and-feels and define the interface of a common kind of plugins - the
+ component plugins.
+ .
+ This package contains API documentation (Javadoc) for liblaf-plugin-java.
+
+Package: liblaf-widget-java
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: liblaf-widget-java-doc
+Description: Java widget toolbox for other look-and-feel libraries
+ Laf-Widget project provide support for and base set of
+ additional behaviour and widgets in look-and-feels libraries.
+ .
+ The list of currently provided widgets (from v4)
+  * Auto-completion (model-based / free-text) on editable combo boxes.
+  * Hover preview of minimized internal frames on desktop icons.
+  * Menu search panel on menu bars.
+  * Hover preview of tab in tabbed panes.
+  * Overview dialog on tabbed panes with optional periodic refresh.
+  * Tab paging on tabbed panes.
+  * Password strength checker on password fields.
+  * Lock border on non-editable text components and model editable combobox.
+  * Select all text in text component on focus gain.
+  * Context menu on text components with edit actions (copy / paste / cut ...).
+  * Enhanced drag-and-drop support for trees.
+  * Scroll pane selector.
+  * Selecting / deselecting in text components on Escape key press.
+ .
+ Laf-Widget is used by substance look-and-feel since 3.0
+
+Package: liblaf-widget-java-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: default-jdk-doc, liblaf-widget-java
+Description: Java widget toolbox for look-and-feel libraries - documentation
+ Laf-Widget project provide support for and base set of
+ additional behaviour and widgets in look-and-feels libraries.
+ .
+ The list of currently provided widgets (from v4)
+  * Auto-completion (model-based / free-text) on editable combo boxes.
+  * Hover preview of minimized internal frames on desktop icons.
+  * Menu search panel on menu bars.
+  * Hover preview of tab in tabbed panes.
+  * Overview dialog on tabbed panes with optional periodic refresh.
+  * Tab paging on tabbed panes.
+  * Password strength checker on password fields.
+  * Lock border on non-editable text components and model editable combobox.
+  * Select all text in text component on focus gain.
+  * Context menu on text components with edit actions (copy / paste / cut ....
+  * Enhanced drag-and-drop support for trees.
+  * Scroll pane selector.
+  * Selecting / deselecting in text components on Escape key press.
+ .
+ Laf-Widget is used by substance look-and-feel since 3.0
+ .
+ This package contains API documentation (Javadoc) for liblaf-widget-java.
+
+Package: substance
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: substance-doc
+Description: cross-platform look & feel for Swing applications
+ The goal of this project is to provide a configurable and
+ customizable production-quality Java look and feel library for Swing
+ applications. This Java look and feel is available for JDK 5.0+ only.
+
+Package: substance-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: default-jdk-doc, substance
+Description: cross-platform look & feel for Swing applications - documentation
+ The goal of this project is to provide a configurable and
+ customizable production-quality Java look and feel library for Swing
+ applications. This Java look and feel is available for JDK 5.0+ only.
+ .
+ This package contains API documentation (Javadoc) for substance.
+
+Package: substance-flamingo
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: libflamingo-java, substance
+Suggests: substance-flamingo-doc
+Description: Substance Flamingo plugin
+ The goal of this project is to provide a consistent apperance for
+ Flamingo components (see libflamingo-java) under the substance
+ Substance (see substance) look-and-feel. This requires a JDK version
+ 5.0+.
+
+Package: substance-flamingo-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Recommends: libflamingo-java-doc, substance-doc, substance-flamingo
+Suggests: default-jdk-doc
+Description: Substance Flamingo plugin (documentation)
+ The goal of this project is to provide a consistent apperance for
+ Flamingo components (see libflamingo-java) under the substance
+ Substance (see substance) look-and-feel. This requires a JDK version
+ 5.0+.
+ This package contains API documentation (Javadoc) for substance-flamingo.
+
+Package: substance-swingx
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: libswingx-java, substance
+Suggests: substance-swingx-doc
+Description: Swingx components for substance L&F
+ The goal of this project is to provide a consistent apperance
+ for SwingX components (see libswingx-java) under the substance
+ (see substance) look-and-feel.
+
+Package: substance-swingx-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Recommends: libswingx-java-doc, substance-doc, substance-swingx
+Suggests: default-jdk-doc
+Description: Swingx components for substance L&F (documentation)
+ The goal of this project is to provide a consistent apperance
+ for SwingX components (see libswingx-java) under the substance
+ (see substance) look-and-feel.
+ This package contains API documentation (Javadoc) for substance-swingx.
+
+Package: libtrident-java
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Suggests: libtrident-java-doc
+Description: Animation library for Java applications
+ The main goal of Trident project is to provide a general
+ purpose animation library for Java applications. Animations
+ are a natural fit for modern client applications, and
+ Trident has special built-in support for Java based UI
+ toolkits such as Swing and SWT.
+ The classes for the Android are not included.
+
+Package: libtrident-java-doc
+Section: doc
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Suggests: default-jdk-doc, libtrident-java
+Description: Animation library for Java applications (documentation)
+ The main goal of Trident project  is to provide a general
+ purpose animation library for Java applications. Animations
+ are a natural fit for modern client applications, and
+ Trident has special built-in support for Java based UI
+ toolkits such as Swing and SWT.
+ .
+ This package contains API documentation (Javadoc) for libtrident-java.

@@ -1,0 +1,63 @@
+dependencies {
+  compile project(":trident")
+  compile group: 'asm', name: 'asm-all', version: '2.2.3'
+  compile group: 'org.apache.ant', name: 'ant', version: '1.7.0'
+}
+
+jar {
+  manifest {
+    attributes(
+        "Laf-Widget-Version": version,
+        "Laf-Widget-VersionName": versionKey,
+    )
+  }
+}
+
+uploadPublished {
+  repositories {
+    mavenDeployer {
+      configurePOM(pom)
+    }
+  }
+}
+
+install {
+  configurePOM(repositories.mavenInstaller.pom)
+}
+
+private def configurePOM(def pom) {
+  configureBasePom(pom)
+  pom.project {
+    name "laf-widget"
+    description "A fork of @kirilcool's laf-widget project"
+    url "http://insubstantial.github.com/insubstantial/laf-widget/"
+    licenses {
+      license {
+        name 'The BSD License'
+        url 'http://www.opensource.org/licenses/bsd-license.php'
+        distribution 'repo'
+        comments 'Covers ASM, BlogOfBug, JibX, LafWidget, and Looks contributions'
+      }
+      license {
+        name 'CC BY-SA 2.5'
+        url 'http://creativecommons.org/licenses/by-sa/2.5/'
+        distribution 'repo'
+        comments 'Covers the TangoIcons'
+      }
+    }
+  }
+  // deal with a gradle bug where transitive=false is not passed into the generated POM
+  pom.whenConfigured {cpom ->
+    cpom.dependencies.each {dep ->
+      switch (dep.artifactId) {
+        case 'trident':
+          dep.classifier = 'swing'
+          break
+        case 'ant':
+        case 'asm-all':
+          dep.scope = 'provided'
+          break;
+      }
+    }
+  }
+}

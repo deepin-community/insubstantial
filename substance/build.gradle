@@ -1,0 +1,237 @@
+configurations {
+  testCompile { extendsFrom compile }
+  toolsCompile { extendsFrom compile }
+}
+
+sourceSets {
+  main
+  test
+  tools {
+    compileClasspath = sourceSets.main.output + sourceSets.test.output + configurations.toolsCompile + configurations.testCompile
+  }
+}
+
+
+dependencies {
+  compile module('net.jcip:jcip-annotations:1.0') {
+    transitive = false
+  }
+
+  compile project(path: ":trident")
+  compile project(path: ":laf-widget", transitive: false)
+  compile project(path: ":laf-plugin", transitive: false)
+  testCompile group: 'com.jgoodies', name: 'forms', version: '1.2.0'
+  testCompile group: 'org.swinglabs.swingx', name: 'swingx-core', version: '1.6.3'
+  toolsCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
+  toolsCompile group: 'asm', name: 'asm-all', version: '2.2.3'
+}
+
+task augmentation(dependsOn: classes) {
+  description = "Performs code augmentaiton for the laf-plugin and laf-widget libraries on the substance jar classes"
+
+  doLast {
+    def augmentClassPath = configurations.toolsCompile.asPath
+
+    ant.taskdef(name: 'delegate-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'delegate-update-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentUpdateTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'laf-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentMainTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'icon-ghosting-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentIconGhostingTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'container-ghosting-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentContainerGhostingTask", classpath: augmentClassPath)
+
+    def verboseAugmentation = false
+
+    // Delegate augmentation
+    ant.'delegate-update-augment'(verbose: verboseAugmentation, pattern: ".*UI\u002Eclass") {
+      classpathset(dir: sourceSets.main.output.classesDir)
+    }
+
+    ant.'delegate-augment'(verbose: verboseAugmentation, pattern: ".*UI\u002Eclass") {
+      classpathset(dir: sourceSets.main.output.classesDir)
+    }
+
+    // Icon ghosting augmentation
+    ant.'icon-ghosting-augment'(verbose: verboseAugmentation) {
+      classpathset(dir: sourceSets.main.output.classesDir)
+      iconghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceButtonUI", methodName: "paintIcon")
+      iconghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceToggleButtonUI", methodName: "paintIcon")
+    }
+
+    // Container ghosting augmentation
+    ant.'container-ghosting-augment'(verbose: verboseAugmentation) {
+      classpathset(dir: sourceSets.main.output.classesDir)
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceDesktopPaneUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceMenuBarUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceMenuUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstancePanelUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceScrollBarUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.internal.ui.SubstanceToolBarUI", toInjectAfterOriginal: "true")
+    }
+  }
+}
+
+jar {
+  dependsOn augmentation
+  dependsOn toolsClasses
+
+  manifest {
+    attributes(
+        "Substance-Distribution": "Full",
+        "Substance-Version": version,
+        "Substance-VersionName": versionKey,
+    )
+  }
+
+}
+
+task liteJar(type: Jar) {
+  dependsOn augmentation
+  dependsOn toolsClasses
+
+  classifier = 'lite'
+
+  from sourceSets.main.output
+  exclude 'org/pushingpixels/substance/internal/contrib/randelshofer/**'
+  exclude 'org/pushingpixels/substance/internal/contrib/xoetrope/**'
+  exclude 'org/pushingpixels/substance/internal/ui/SubstanceColorChooserUI*'
+  exclude 'org/pushingpixels/lafwidget/ant/**'
+
+  manifest {
+    attributes(
+        "Substance-Distribution": "Lite",
+        "Substance-Version": version,
+        "Substance-VersionName": versionKey,
+    )
+  }
+}
+
+task testJar(type: Jar) {
+  classifier = 'tst'
+
+  from sourceSets.test.output
+
+  manifest {
+    attributes(
+        "Substance-Version": version,
+        "Substance-VersionName": versionKey,
+    )
+  }
+}
+
+task testLiteJar(type: Jar) {
+  classifier = 'tst-lite'
+
+  from sourceSets.test.output
+
+  manifest {
+    attributes(
+        "Substance-Version": version,
+        "Substance-VersionName": versionKey,
+    )
+  }
+}
+
+
+task toolsJar(type: Jar) {
+  classifier = 'tools'
+  from sourceSets.tools.output
+  manifest {
+    attributes(
+        "Substance-Version": version,
+        "Substance-VersionName": versionKey,
+    )
+  }
+}
+
+task distroJar(type: Jar) {
+  dependsOn toolsJar, liteJar, testJar, testLiteJar, jar
+  classifier = 'all'
+  from(projectDir)
+  include "lib/**"
+  include "src/**"
+  include "gradle.properties"
+  include "build.gradle"
+  exclude "**/*.vsd"
+}
+
+
+artifacts {
+  archives toolsJar
+  archives liteJar
+  archives testJar
+  distro toolsJar
+  distro liteJar
+}
+
+uploadPublished {
+  repositories {
+    mavenDeployer {
+      configurePOM(pom)
+    }
+  }
+}
+
+install {
+  configurePOM(repositories.mavenInstaller.pom)
+}
+
+private def configurePOM(def pom) {
+  configureBasePom(pom)
+  pom.project {
+    name "substance"
+    description "A fork of @kirilcool's substance project"
+    url "http://insubstantial.github.com/insubstantial/substance/"
+    licenses {
+      license {
+        name 'BSD License'
+        url 'http://www.opensource.org/licenses/bsd-license.php'
+        distribution 'repo'
+        comments "Does not cover the Xoetrope Color Wheel"
+      }
+      license {
+        name 'Mozilla Public License 1.1'
+        url 'http://www.opensource.org/licenses/mozilla1.1'
+        distribution 'repo'
+        comments "Covers the Xoetrope Color Wheel"
+      }
+    }
+  }
+
+  // deal with a gradle bug where transitive=false is not passed into the generated POM
+  pom.whenConfigured {cpom ->
+    cpom.dependencies.each {dep ->
+      switch (dep.artifactId) {
+        case 'jcip-annotations':
+          dep.scope = 'provided'
+          break;
+        case 'trident':
+          dep.classifier = 'swing'
+          break
+      }
+    }
+  }
+
+}
+
+
+task jitterbug(type: JavaExec) {
+    main = 'tools.jitterbug.JitterbugEditor'
+    debug = Boolean.valueOf(System.getProperty('debug', 'false'))
+    classpath = sourceSets.tools.compileClasspath + sourceSets.tools.runtimeClasspath
+}
+
+task testCheck(type: JavaExec) {
+  main = 'test.Check'
+  debug = Boolean.valueOf(System.getProperty('debug', 'true'))
+  classpath = sourceSets.test.runtimeClasspath
+}
+
+task testFoo(type: JavaExec) {
+  main = 'Foo'
+  debug = Boolean.valueOf(System.getProperty('debug', 'false'))
+  classpath = sourceSets.test.runtimeClasspath
+}
+task testTridentLeakSnippet(type: JavaExec) {
+  main = 'TridentLeakSnippet'
+  debug = Boolean.valueOf(System.getProperty('debug', 'false'))
+  classpath = sourceSets.test.runtimeClasspath
+}

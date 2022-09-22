@@ -1,0 +1,57 @@
+insubstantial (7.3+dfsg3-5) unstable; urgency=medium
+
+  [ Andrius Merkys ]
+  * Team upload.
+  * Fixed typos in package descriptions.
+
+  [ Markus Koschany ]
+  * Apply patch by Andrius Merkys and fix NullPointerException in
+    getDefaultBackgroundColor. (Closes: 935777)
+  * Switch to debhelper-compat = 12.
+  * Declare compliance with Debian Policy 4.4.0.
+
+ -- Markus Koschany <apo@debian.org>  Mon, 26 Aug 2019 13:49:59 +0200
+
+insubstantial (7.3+dfsg3-4) unstable; urgency=medium
+
+  * Team upload.
+  * Added the missing build dependency on default-jdk-doc (Closes: #906364)
+  * Standards-Version updated to 4.2.1
+  * Use salsa.debian.org Vcs-* URLs
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 11 Oct 2018 02:42:26 +0200
+
+insubstantial (7.3+dfsg3-3) unstable; urgency=medium
+
+  * Team upload.
+  * Fixed the build failure with Java 9 (Closes: #894288)
+  * Standards-Version updated to 4.1.4
+  * Switch to debhelper level 11
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 06 Apr 2018 11:44:30 +0200
+
+insubstantial (7.3+dfsg3-2) unstable; urgency=medium
+
+  * Team upload.
+  * Transition to libswt-gtk-4-java
+  * Use substitution rules instead of a patch for building with the system jars
+  * Depend on libasm-java (>= 5.0) instead of libasm4-java
+  * Simplified no_android.patch
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 04 Aug 2016 10:29:59 +0200
+
+insubstantial (7.3+dfsg3-1) unstable; urgency=medium
+
+  * Team upload.
+  * Upload to unstable
+
+  [ Felix Natter ]
+  * Remove copyrighted color definitions from source tarball.
+
+ -- Markus Koschany <apo@debian.org>  Sun, 10 Apr 2016 20:48:18 +0200
+
+insubstantial (7.3+dfsg2-1) experimental; urgency=medium
+
+  * Initial release. (Closes: #787953)
+
+ -- Felix Natter <fnatter@gmx.net>  Mon, 18 Jan 2016 20:58:45 +0100

@@ -1,0 +1,140 @@
+ext.swingXVersion = "1.6.3"
+
+configurations {
+  testCompile { extendsFrom compile }
+  toolsCompile { extendsFrom compile }
+}
+
+sourceSets {
+  main
+  test
+  tools {
+    compileClasspath = sourceSets.main.output + sourceSets.test.output + configurations.toolsCompile + configurations.testCompile
+  }
+}
+
+dependencies {
+  compile project(":substance")
+  compile group: 'org.swinglabs.swingx', name: 'swingx-core', version: swingXVersion
+  testCompile project(":substance").sourceSets.test.output
+  testCompile group: 'com.jgoodies', name: 'forms', version: '1.2.0'
+  toolsCompile project(":substance").sourceSets.tools.output
+  toolsCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
+  toolsCompile group: 'asm', name: 'asm-all', version: '2.2.3'
+}
+
+task augmentation(dependsOn: classes) {
+  description = "Performs code augmentaiton for the laf-plugin and laf-widget libraries on the substance jar classes"
+
+  doLast {
+    def augmentClassPath = configurations.toolsCompile.asPath + File.pathSeparator + configurations.compile.asPath
+
+    ant.taskdef(name: 'delegate-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'delegate-update-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentUpdateTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'laf-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentMainTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'icon-ghosting-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentIconGhostingTask", classpath: augmentClassPath)
+    ant.taskdef(name: 'container-ghosting-augment', classname: "org.pushingpixels.lafwidget.ant.AugmentContainerGhostingTask", classpath: augmentClassPath)
+
+    def verboseAugmentation = false
+
+    // Delegate augmentation
+    ant.'delegate-update-augment'(verbose: verboseAugmentation, pattern: ".*UI\u002Eclass") {
+      classpathset(dir: sourceSets.main.output.classesDir)
+    }
+
+    ant.'delegate-augment'(verbose: verboseAugmentation, pattern: ".*UI\u002Eclass") {
+      classpathset(dir: sourceSets.main.output.classesDir)
+    }
+
+    // Container ghosting augmentation
+    ant.'container-ghosting-augment'(verbose: verboseAugmentation) {
+      classpathset(dir: sourceSets.main.output.classesDir)
+      containerghosting(className: "org.pushingpixels.substance.swingx.SubstanceStatusBarUI", toInjectAfterOriginal: "true")
+      containerghosting(className: "org.pushingpixels.substance.swingx.SubstanceTaskPaneContainerUI", toInjectAfterOriginal: "true")
+    }
+  }
+}
+
+jar {
+  dependsOn augmentation
+
+  manifest {
+    attributes(
+        "Substance-Version": version,
+        "SwingX-Version": swingXVersion,
+        "Substance-VersionName": versionKey,
+    )
+  }
+
+}
+
+task testJar(type: Jar) {
+  classifier = 'tst'
+
+  from sourceSets.test.output
+
+  manifest {
+    attributes(
+        "Substance-Version": version,
+        "Flamingo-Version": version,
+        "Substance-VersionName": versionKey,
+        "Flamingo-VersionName": versionKey,
+    )
+  }
+}
+
+task distroJar(type: Jar) {
+  //dependsOn toolsJar, testJar, jar
+  dependsOn jar
+  classifier = 'all'
+  from(projectDir)
+  include "lib/**"
+  include "src/**"
+  include "www/**/*.html"
+  include "www/docs/**"
+  include "www/images/**"
+  include "gradle.properties"
+  include "build.gradle"
+}
+
+
+uploadPublished {
+  repositories {
+    mavenDeployer {
+      configurePOM(pom)
+    }
+  }
+}
+
+install {
+  configurePOM(repositories.mavenInstaller.pom)
+}
+
+private def configurePOM(def pom) {
+  configureBasePom(pom)
+  pom.project {
+    name "substance-swingx"
+    description "A fork of @kirilcool's substance project"
+    url "http://insubstantial.github.com/insubstantial/substance-swingx/"
+    licenses {
+      license {
+        name 'BSD License'
+        url 'http://www.opensource.org/licenses/bsd-license.php'
+        distribution 'repo'
+        comments "Does not cover the Xoetrope Color Wheel"
+      }
+      license {
+        name 'Mozilla Public License 1.1'
+        url 'http://www.opensource.org/licenses/mozilla1.1'
+        distribution 'repo'
+        comments "Covers the Xoetrope Color Wheel"
+      }
+    }
+  }
+}
+
+task testCheckX(type: JavaExec) {
+  main = 'test.Check'
+  debug = Boolean.valueOf(System.getProperty('debug', 'false'))
+  classpath = sourceSets.test.runtimeClasspath
+}

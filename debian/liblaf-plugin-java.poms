@@ -1,0 +1,1 @@
+debian/pom-liblaf-plugin.xml --java-lib --has-package-version --artifact=laf-plugin/build/libs/laf-plugin-7.3.jar

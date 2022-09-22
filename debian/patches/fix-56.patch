@@ -1,0 +1,23 @@
+Description: Work-around for [#56](https://github.com/Insubstantial/insubstantial/issues/56)
+ as suggested in [#56#issuecomment-333986024](https://github.com/Insubstantial/insubstantial/issues/56#issuecomment-333986024).
+Author: Andrius Merkys <merkys@debian.org>
+Bug-Upstream: https://github.com/Insubstantial/insubstantial/issues/56
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=935777
+--- a/substance/src/main/java/org/pushingpixels/substance/api/SubstanceLookAndFeel.java
++++ b/substance/src/main/java/org/pushingpixels/substance/api/SubstanceLookAndFeel.java
+@@ -2201,6 +2201,7 @@
+ 			}
+ 
+ 			// file chooser strings go to the main UIManager table
++/*
+             for (ResourceBundle bundle : new ResourceBundle[] {
+                     ResourceBundle.getBundle("com.sun.swing.internal.plaf.metal.resources.metal"),
+                     SubstanceLookAndFeel.getLabelBundle()
+@@ -2214,6 +2215,7 @@
+                     }
+                 }
+             }
++*/
+ 
+ 			if (isSubstance)
+ 				LazyResettableHashMap.reset();

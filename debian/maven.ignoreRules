@@ -1,0 +1,4 @@
+
+com.google.android android * * * *
+org.easytesting fest-swing * * * *
+com.jgoodies forms * * * *

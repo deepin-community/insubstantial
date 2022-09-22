@@ -1,0 +1,6 @@
+no_android.patch
+version.patch
+javadoc_encoding.patch
+asm5.patch
+java9-compatibility.patch
+fix-56.patch

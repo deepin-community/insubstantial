@@ -1,0 +1,23 @@
+Description: revert to last stable version / remove SNAPSHOT
+Author: Felix Natter <fnatter@gmx.net>
+Origin: other
+Forwarded: not-needed
+Last-Update: 2015-06-01
+--- a/build.gradle
++++ b/build.gradle
+@@ -1,5 +1,5 @@
+ group = 'com.github.insubstantial'
+-version = '7.3.1-SNAPSHOT'
++version = '7.3'
+ 
+ if (JavaVersion.current().isJava8Compatible()) {
+   allprojects {
+@@ -15,7 +15,7 @@
+   apply plugin: 'signing'
+ 
+   group = 'com.github.insubstantial'
+-  version = '7.3.1-SNAPSHOT'
++  version = '7.3'
+   ext.versionKey = "7.3-destroyer"
+ 
+   sourceCompatibility = 1.6

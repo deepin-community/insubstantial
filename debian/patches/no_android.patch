@@ -1,0 +1,33 @@
+Description: Do not build android parts of trident
+Author: Andrew Ross <ubuntu@rossfamily.co.uk>
+Origin: other
+Forwarded: not-needed
+Last-Update: 2011-03-29
+--- a/trident/src/main/resources/META-INF/trident-plugin.properties
++++ b/trident/src/main/resources/META-INF/trident-plugin.properties
+@@ -4,7 +4,5 @@
+ UIToolkitHandler=org.pushingpixels.trident.swt.SWTToolkitHandler
+ PropertyInterpolatorSource=org.pushingpixels.trident.swt.SWTPropertyInterpolators
+ 
+-UIToolkitHandler=org.pushingpixels.trident.android.AndroidToolkitHandler
+-PropertyInterpolatorSource=org.pushingpixels.trident.android.AndroidPropertyInterpolators
+ 
+ PropertyInterpolatorSource=org.pushingpixels.trident.interpolator.CorePropertyInterpolators
+\ No newline at end of file
+--- a/trident/build.gradle
++++ b/trident/build.gradle
+@@ -4,6 +4,14 @@
+   compile group: 'net.jcip', name:'jcip-annotations', version: '1.0'
+ }
+ 
++sourceSets {
++  main {
++    java {
++      exclude "**/android*"
++    }
++  }
++}
++
+ jar {
+   exclude 'META-INF/trident-plugin-*.properties'
+ 
